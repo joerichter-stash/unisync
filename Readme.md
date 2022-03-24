@@ -5,7 +5,7 @@ A hackable inotify daemon for Unison..
 
 Features
 --------
-Unisync.py is a daemon that uses inotify to detect changes in the local
+Unisync.py uses inotify to detect changes in the local
 unison root and employs the venerable file synchronizer unison to
 do the real sync.
 
@@ -15,13 +15,14 @@ are syncronized, unless a full-sync is triggered with sigalarm.
 
 Setup
 -----
-`sudo apt install python3 unison python3-pyinotify`
+```
+sudo apt install python3 unison python3-pyinotify
 
-*optionally for onscreen notifications:*
+#optionally for onscreen notifications:
+sudo apt install xosd-bin
+```
 
-`sudo apt install xosd-bin`
-
-* Setup unison profile in $HOME/.unison/<profile>.prf
+* Setup unison profile in `$HOME/.unison/<profile>.prf`
 * It is possible to create a local root with links to the directories and files that should be syncronized
 * Run initial sync with unison
 
