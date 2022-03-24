@@ -2,7 +2,7 @@
 Features
 --------
 Unisync.py is a daemon that uses inotify to detect changes in the local
-unison root and syncs employs the venerable unison file synchronizer to
+unison root and employs the venerable file synchronizer unison to
 do the real sync.
 On start it runs a full-sync and after that only changed files at the
 local root are syncronized.
