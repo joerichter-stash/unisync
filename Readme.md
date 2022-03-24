@@ -1,3 +1,7 @@
+Unisync
+-------
+A hackable inotify daemon for Unison..
+
 
 Features
 --------
@@ -5,8 +9,9 @@ Unisync.py is a daemon that uses inotify to detect changes in the local
 unison root and employs the venerable file synchronizer unison to
 do the real sync.
 
-On start it runs a full-sync and after that, only localy changed files
+On start, it runs a full-sync. After that, only localy changed files
 are syncronized, unless a full-sync is triggered with sigalarm.
+
 
 Setup
 -----
@@ -19,6 +24,7 @@ Setup
 * Setup unison profile in $HOME/.unison/<profile>.prf
 * It is possible to create a local root with links to the directories and files that should be syncronized
 * Run initial sync with unison
+
 
 Limitations
 -----------
