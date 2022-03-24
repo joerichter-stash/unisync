@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+
 import os, sys
 import signal
 import pyinotify
@@ -14,8 +15,8 @@ def log(*msg):
     print(*msg, file=sys.stderr)
 
 
-LOCAL=0
-REMOTE=1
+_LOCAL = 0
+_REMOTE = 1
 
 
 #TODO convert this to a monitor
@@ -53,7 +54,7 @@ class UnisonSync(object):
 
 
     def sync(self, paths=[]):
-        r_paths = [os.path.relpath(i, self.roots[LOCAL]) for i in set(paths)]
+        r_paths = [os.path.relpath(i, self.roots[_LOCAL]) for i in set(paths)]
         r_paths = disjunct_toplevel(r_paths)
         log("sync_paths:", r_paths)
 
@@ -63,7 +64,7 @@ class UnisonSync(object):
         if self.profile:
             cmd += [self.profile]
         else:
-            cmd += [self.roots[LOCAL], self.roots[REMOTE]]
+            cmd += [self.roots[_LOCAL], self.roots[_REMOTE]]
 
         cmd += r_paths
 
@@ -198,7 +199,7 @@ def main(argv=sys.argv):
             # XXX daemon-thread may interrupt unison subprocess, but it should be able to handle that
             sync_loop = threading.Thread(target=usync.schedule_sync, daemon=True)
             sync_loop.start()
-            observe_dir(usync.roots[LOCAL], usync.add_path)
+            observe_dir(usync.roots[_LOCAL], usync.add_path)
         else:
             log("initial sync failed");
             sys.exit(-1)
