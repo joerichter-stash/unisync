@@ -26,6 +26,10 @@ sudo apt install xosd-bin
 * It is possible to create a local root with links to the directories and files that should be syncronized
 * Setup unison profile in `$HOME/.unison/<profile>.prf`
 
+
+Usage
+-----
+
 ```
 unison profile # initial sync
 
