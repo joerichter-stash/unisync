@@ -4,6 +4,7 @@ Features
 Unisync.py is a daemon that uses inotify to detect changes in the local
 unison root and employs the venerable file synchronizer unison to
 do the real sync.
+
 On start it runs a full-sync and after that, only localy changed files
 are syncronized, unless a full-sync is triggered with sigalarm.
 
@@ -39,7 +40,6 @@ Troubleshooting
 * For Ubuntu you can also download and use a specific deb-package from
   debian if compatibility with other debian based distributions is required
   (like Raspbian).
-* How to reset the state for one root? -> unison -prefer | -force
 
 
 TODO
@@ -47,9 +47,9 @@ TODO
 
 * Sync on server-update: Broker service: publish last modifcation of state-file
     * .unison/arXYZ -> roots in line 2
-    * How is the filename calculated?:
-    * 'unison -ignore 'Regex .*' -showarchive'
-    * [update.ml:232]
+    * filename calculation:
+        * 'unison -ignore 'Regex .*' -showarchive'
+        * [update.ml:232]
 
 * (GUI with status icon)
 
