@@ -21,10 +21,16 @@ sudo apt install python3 unison python3-pyinotify
 #optionally for onscreen notifications:
 sudo apt install xosd-bin
 ```
+* copy or link unisync.py to a directory included in `$PATH`, e.g. `$HOME/bin/`
 
-* Setup unison profile in `$HOME/.unison/<profile>.prf`
 * It is possible to create a local root with links to the directories and files that should be syncronized
-* Run initial sync with unison
+* Setup unison profile in `$HOME/.unison/<profile>.prf`
+
+```
+unison profile # initial sync
+
+unisync.py profile # run as daemon
+```
 
 
 Limitations
