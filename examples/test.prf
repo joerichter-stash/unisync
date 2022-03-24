@@ -1,0 +1,12 @@
+# Unison preferences
+root = /tmp/test1
+root = /tmp/test2
+#root = ssh://user@yourbox//data/sync/test1
+
+#follow = Regex .*
+follow = Name link_*
+follow = Name +*
+
+confirmbigdel = false
+copyprog      = rsync --inplace --compress
+copyprogrest  = rsync --partial --inplace --compress
