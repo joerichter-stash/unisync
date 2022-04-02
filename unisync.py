@@ -54,7 +54,9 @@ class OSD_Context(CMD_Context):
 
 class UnisonSync(object):
 
-    def __init__(self, roots_profile=None):
+    def __init__(self, roots_profile=None, daemon=False):
+        self.daemon = daemon
+        self.has_failed = False
         self.queue = deque()
         self.e_run= threading.Event()
         self.last_update = 0
@@ -66,9 +68,11 @@ class UnisonSync(object):
             self.parse_config(profile_path)
             self.profile = roots_profile[0]
         else:
+            if len(self.roots) != 2:
+                raise NameError("could not find sync-roots")
+            #XXX avoid roots in default profile, especially if two roots are set as parameter
             self.roots = roots_profile[:2] if roots_profile else []
-        if len(self.roots) != 2:
-            raise NameError("could not find sync-roots")
+
         log("roots:", self.roots)
         signal.signal(signal.SIGALRM, self.wakeup_handler)
 
@@ -92,7 +96,13 @@ class UnisonSync(object):
             status = subprocess.run(cmd)
 
         log("Status:", "Success" if status.returncode == 0 else "Error Code: " + str(status.returncode), "\n--")
-        if status.returncode != 0:
+        if status.returncode == 0:
+            self.has_failed = False
+        else:
+            self.has_failed = True
+            if not self.daemon:
+                sys.exit(-2)
+
             with OSD_Context("[sync failed]", status="error"):
                 time.sleep(10)
 
@@ -105,6 +115,9 @@ class UnisonSync(object):
         if len(self.queue) == 0 or self.queue[-1] != changed_path:
             self.queue.append(changed_path)
 
+            # ignore updates in daemon-mode and sync has_failed
+            if self.has_failed:
+                return
             # XXX continuous events may prevent start -> use fixed batches?
             signal.setitimer(signal.ITIMER_REAL, 0.2) # sync X seconds after last event
 
@@ -212,12 +225,18 @@ def disjunct_toplevel(files):
 
 
 def main(argv=sys.argv):
+    first_arg_idx = 1
+    daemon = False
 
     if len(argv) > 1:
-        usync = UnisonSync(argv[1:])
+        if argv[first_arg_idx] == "-d":
+            daemon = True
+            first_arg_idx += 1
+
+        usync = UnisonSync(argv[first_arg_idx:], daemon=daemon)
 
         # initial sync
-        if usync.sync():
+        if usync.sync() or daemon:
             # XXX daemon-thread may interrupt unison subprocess, but it should be able to handle that
             sync_loop = threading.Thread(target=usync.schedule_sync, daemon=True)
             sync_loop.start()
@@ -227,7 +246,7 @@ def main(argv=sys.argv):
             sys.exit(-1)
 
     else:
-        log("usage: <profile>|<src-dir dst-dir>")
+        log("usage: [-d] <profile>|<src-dir dst-dir>")
 
 
 if __name__ == "__main__":
