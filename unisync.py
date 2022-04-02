@@ -19,17 +19,37 @@ _LOCAL = 0
 _REMOTE = 1
 
 
-#TODO convert this to a monitor
-if not 'DISPLAY' in os.environ:
-    def display_status():
-        pass
-else:
-    # requires package xosd-bin
-    def display_status(text, status=None, delay=1):
-        color = ['-c' + 'lightgreen' if not status else 'red']
-        delay = ['-d' + str(delay)]
-        p = subprocess.Popen(["osd_cat", "-O2", "-o10", "-i10"] + delay + color, stdin=PIPE)
-        p.communicate(input=text.encode())
+class CMD_Context:
+    process = None
+    cmd = None
+
+    def __enter__(self):
+        t = threading.Thread(target=self.run_cmd, daemon=True)
+        t.start()
+
+    def run_cmd(self):
+        if self.process or not self.cmd:
+            return
+        if self.input_text:
+            self.process = subprocess.Popen(self.cmd, stdin=PIPE)
+            self.process.communicate(input=self.input_text.encode())
+        else:
+            self.process = subprocess.Popen(self.cmd)
+
+    def __exit__(self, exc_type, exc_value, exc_tb):
+        #log("Leaving CMD_Context...")
+        #log("Exc_type:", exc_type, "Exc_val:", exc_value, "Exc_tb:", exc_tb)
+        if self.process:
+            self.process.terminate()
+
+class OSD_Context(CMD_Context):
+
+    def __init__(self, text, status=None, max_delay=0):
+        if os.path.isfile("/usr/bin/osd_cat") and 'DISPLAY' in os.environ:
+            self.input_text = text
+            color = ['-c' + ('lightgreen' if not status else 'red')]
+            delay = ['-d' + str(max_delay)]
+            self.cmd = ["osd_cat", "-O2", "-o10", "-i10"] + delay + color
 
 
 class UnisonSync(object):
@@ -68,11 +88,13 @@ class UnisonSync(object):
 
         cmd += r_paths
 
-        display_status("[sync]")
-        status = subprocess.run(cmd)
+        with OSD_Context("[syncing]"):
+            status = subprocess.run(cmd)
+
         log("Status:", "Success" if status.returncode == 0 else "Error Code: " + str(status.returncode), "\n--")
         if status.returncode != 0:
-            display_status("[sync failed]", status="error", delay=10)
+            with OSD_Context("[sync failed]", status="error"):
+                time.sleep(10)
 
         #TODO exit on serious return-code or try to recover
         return status.returncode == 0
